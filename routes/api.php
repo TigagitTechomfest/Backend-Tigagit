@@ -1,40 +1,47 @@
 <?php
 
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\Api\HealthProfileController;
-use App\Http\Controllers\Api\FoodController;
-use App\Http\Controllers\Api\FoodLogController;
-use App\Http\Controllers\Api\RecipeController;
-use App\Http\Controllers\Api\DashboardController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\HealthAssessmentController;
+use App\Http\Controllers\FoodDatabaseController;
+use App\Http\Controllers\DailyLogController;
+use App\Http\Controllers\AiFeedbackController;
+use App\Http\Controllers\ProgressController;
+use App\Http\Controllers\ExerciseLogController;
 
-// Public routes
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login']);
-
-// Protected routes
-Route::middleware('auth:sanctum')->group(function () {
-    // Auth routes
-    Route::post('/logout', [AuthController::class, 'logout']);
-    Route::get('/user', [AuthController::class, 'user']);
-
-    // Health Profile routes
-    Route::apiResource('health-profiles', HealthProfileController::class)->only(['store', 'update', 'show']);
-
-    // Food routes
-    Route::get('/foods', [FoodController::class, 'search']);
-
-    // Food Log routes
-    Route::apiResource('logs', FoodLogController::class)->only(['store', 'index', 'destroy']);
-    Route::get('/logs/{date}', [FoodLogController::class, 'getByDate']);
-
-    // Recipe routes
-    Route::apiResource('recipes', RecipeController::class);
-    Route::post('/recipes/{recipe}/ingredients', [RecipeController::class, 'addIngredient']);
-    Route::delete('/recipes/{recipe}/ingredients/{ingredient}', [RecipeController::class, 'removeIngredient']);
-
-    // Dashboard routes
-    Route::get('/dashboard/{date}', [DashboardController::class, 'getSummary']);
+Route::group(['prefix' => 'auth'], function () {
+    Route::post('register', [AuthController::class, 'register']);
+    Route::post('login', [AuthController::class, 'login']);
+    Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:api');
+    Route::post('refresh', [AuthController::class, 'refresh'])->middleware('auth:api');
+    Route::get('me', [AuthController::class, 'me'])->middleware('auth:api');
 });
 
+Route::middleware(['auth:api'])->group(function () {
+    // Health Assessment
+    Route::post('assessment', [HealthAssessmentController::class, 'store']);
+    Route::get('assessment', [HealthAssessmentController::class, 'show']);
+    Route::post('assessment/weight', [HealthAssessmentController::class, 'updateWeight']);
 
+    // Food Database
+    Route::get('foods/list', [FoodDatabaseController::class, 'list']);
+    Route::post('foods/batch', [FoodDatabaseController::class, 'batchDetails']);
+    Route::get('foods/{id}', [FoodDatabaseController::class, 'show'])->where('id', '[0-9]+');
+    Route::get('foods', [FoodDatabaseController::class, 'index']);
+    Route::post('foods', [FoodDatabaseController::class, 'store']);
+
+    // Daily Logs
+    Route::get('daily-logs', [DailyLogController::class, 'getDailyLog']);
+    Route::post('daily-logs/meal', [DailyLogController::class, 'addMeal']);
+
+    // AI Feedback
+    Route::post('feedback/daily', [AiFeedbackController::class, 'generateDailyFeedback']);
+
+    // Progress
+    Route::get('progress/daily', [ProgressController::class, 'daily']);
+    Route::get('progress/weekly', [ProgressController::class, 'weekly']);
+
+    // Exercise Logs
+    Route::post('exercises', [ExerciseLogController::class, 'store']);
+});
