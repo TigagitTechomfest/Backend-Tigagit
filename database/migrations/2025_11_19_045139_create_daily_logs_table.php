@@ -11,15 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('food_logs', function (Blueprint $table) {
+        Schema::create('daily_logs', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('food_id')->constrained('foods')->onDelete('cascade');
-            $table->decimal('quantity_grams', 8, 2);
-            $table->enum('meal_type', ['breakfast', 'lunch', 'dinner', 'snack'])->default('snack');
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->date('log_date');
+            $table->jsonb('meal_entries')->default('[]'); // JSONB for PostgreSQL
+            $table->jsonb('total_daily_intake')->nullable();
+            $table->boolean('ai_feedback_generated')->default(false);
             $table->timestamps();
-            
+        
             $table->index(['user_id', 'log_date']);
         });
     }
@@ -29,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('food_logs');
+        Schema::dropIfExists('daily_logs');
     }
 };
