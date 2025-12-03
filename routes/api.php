@@ -16,6 +16,13 @@ Route::group(['prefix' => 'auth'], function () {
     Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:api');
     Route::post('refresh', [AuthController::class, 'refresh'])->middleware('auth:api');
     Route::get('me', [AuthController::class, 'me'])->middleware('auth:api');
+    
+    // Profile Update
+    Route::post('profile', [AuthController::class, 'updateProfile'])->middleware('auth:api');
+
+    // Password Reset
+    Route::post('forgot-password', [AuthController::class, 'forgotPassword']);
+    Route::post('reset-password', [AuthController::class, 'resetPassword']);
 });
 
 Route::middleware(['auth:api'])->group(function () {

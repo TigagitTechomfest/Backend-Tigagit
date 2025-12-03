@@ -1,0 +1,1045 @@
+{
+  "info": {
+    "_postman_id": "45b6e8de-125a-4ea6-b17d-37d7f137d768",
+    "name": "Nutrition Web App",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Register",
+      "event": [
+        {
+          "id": "8e6b46da-8d95-4079-8e9c-e5c1bc02d053",
+          "listen": "test",
+          "script": {
+            "id": "f2d93e3b-ac4a-44a8-bb02-260176aff2b5",
+            "exec": [
+              "// Register",
+              "pm.test(\"Status code is 201 or 200\", function () {",
+              "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+              "});",
+              "",
+              "pm.test(\"Response is JSON\", function () {",
+              "    pm.response.to.have.header(\"Content-Type\");",
+              "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+              "});",
+              "",
+              "try {",
+              "    var jsonData = pm.response.json();",
+              "    pm.test(\"Response has user fields\", function () {",
+              "        pm.expect(jsonData).to.have.property(\"id\");",
+              "        pm.expect(jsonData).to.have.property(\"email\");",
+              "    });",
+              "} catch (e) {",
+              "    pm.test(\"Response is valid JSON\", function () {",
+              "        pm.expect.fail(\"Response is not valid JSON\");",
+              "    });",
+              "}",
+              "",
+              "pm.test(\"No error in response\", function () {",
+              "    var jsonData;",
+              "    try { jsonData = pm.response.json(); } catch (e) { return; }",
+              "    pm.expect(jsonData).to.not.have.property(\"error\");",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "id": "656f42f5-e819-46b7-a254-53c2b4ad5cd0",
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "id": "d08c6fcf-0f0e-4dd5-b1bb-e15573eb7190",
+      "request": {
+        "method": "POST",
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"name\": \"khalisa\",\r\n  \"email\": \"khalisa@gmail.com\",\r\n  \"password\": \"12345678\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/auth/register",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "auth",
+            "register"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Health Assessment",
+      "event": [
+        {
+          "id": "8c118f96-946e-44ed-b554-a8e72b9ac361",
+          "listen": "test",
+          "script": {
+            "id": "a85710a0-5997-40a6-927b-35495e5382ef",
+            "exec": [
+              "// Health Assessment",
+              "pm.test(\"Status code is 201 or 200\", function () {",
+              "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+              "});",
+              "",
+              "pm.test(\"Response is JSON\", function () {",
+              "    pm.response.to.have.header(\"Content-Type\");",
+              "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+              "});",
+              "",
+              "try {",
+              "    var jsonData = pm.response.json();",
+              "    pm.test(\"Response has assessment fields\", function () {",
+              "        pm.expect(jsonData).to.have.property(\"assessment_id\");",
+              "        pm.expect(jsonData).to.have.property(\"status\");",
+              "    });",
+              "} catch (e) {",
+              "    pm.test(\"Response is valid JSON\", function () {",
+              "        pm.expect.fail(\"Response is not valid JSON\");",
+              "    });",
+              "}",
+              "",
+              "pm.test(\"No error in response\", function () {",
+              "    var jsonData;",
+              "    try { jsonData = pm.response.json(); } catch (e) { return; }",
+              "    pm.expect(jsonData).to.not.have.property(\"error\");",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "id": "45671c06-7681-4b3a-966d-148c9cbbc5ef",
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "id": "98e3e680-ab7b-4114-a438-3ab349df2deb",
+      "request": {
+        "method": "POST",
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"age\": 18,\r\n    \"gender\": \"female\",          // \"male\" atau \"female\"\r\n    \"height\": 200,             // dalam cm\r\n    \"weight\": 410,              // dalam kg\r\n    \"activity_level\": \"Moderate\", // Pilihan: \"Sedentary\", \"Light\", \"Moderate\", \"Very Active\"\r\n    \"health_goal\": \"Maintain\",    // Pilihan: \"Weight Loss\", \"Maintain\", \"Weight Gain\", \"Build Muscle\"\r\n    \"dietary_preference\": \"Halal\" // Optional\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/assessment",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "assessment"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Search Foods",
+      "event": [
+        {
+          "id": "09f990fb-edee-40e6-ae29-50266f839941",
+          "listen": "test",
+          "script": {
+            "id": "2842c588-2372-4eb5-9cb3-a990a63ac277",
+            "exec": [
+              "// Search Foods",
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.expect(pm.response.code).to.eql(200);",
+              "});",
+              "",
+              "pm.test(\"Response is JSON\", function () {",
+              "    pm.response.to.have.header(\"Content-Type\");",
+              "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+              "});",
+              "",
+              "try {",
+              "    var jsonData = pm.response.json();",
+              "    pm.test(\"Response is array of foods\", function () {",
+              "        pm.expect(jsonData).to.be.an(\"array\");",
+              "        if (jsonData.length > 0) {",
+              "            pm.expect(jsonData[0]).to.have.property(\"name\");",
+              "            pm.expect(jsonData[0]).to.have.property(\"category\");",
+              "        }",
+              "    });",
+              "} catch (e) {",
+              "    pm.test(\"Response is valid JSON\", function () {",
+              "        pm.expect.fail(\"Response is not valid JSON\");",
+              "    });",
+              "}",
+              "",
+              "pm.test(\"No error in response\", function () {",
+              "    var jsonData;",
+              "    try { jsonData = pm.response.json(); } catch (e) { return; }",
+              "    pm.expect(jsonData).to.not.have.property(\"error\");",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "id": "2e6a0e78-0764-485b-9277-b502dca804cd",
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "id": "b1c8b329-5859-4181-8922-47e611ecabcb",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/foods?search=Ayam&category=Protein",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "foods"
+          ],
+          "query": [
+            {
+              "key": "search",
+              "value": "Ayam"
+            },
+            {
+              "key": "category",
+              "value": "Protein"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Add Food",
+      "event": [
+        {
+          "id": "8a90f855-a4d2-42ca-b338-9b321622d77e",
+          "listen": "test",
+          "script": {
+            "id": "12200172-b365-4813-8a0e-d0ed54f2253b",
+            "exec": [
+              "// Add Food",
+              "pm.test(\"Status code is 201 or 200\", function () {",
+              "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+              "});",
+              "",
+              "pm.test(\"Response is JSON\", function () {",
+              "    pm.response.to.have.header(\"Content-Type\");",
+              "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+              "});",
+              "",
+              "try {",
+              "    var jsonData = pm.response.json();",
+              "    pm.test(\"Response has meal log fields\", function () {",
+              "        pm.expect(jsonData).to.have.property(\"meal_id\");",
+              "        pm.expect(jsonData).to.have.property(\"foods\");",
+              "    });",
+              "} catch (e) {",
+              "    pm.test(\"Response is valid JSON\", function () {",
+              "        pm.expect.fail(\"Response is not valid JSON\");",
+              "    });",
+              "}",
+              "",
+              "pm.test(\"No error in response\", function () {",
+              "    var jsonData;",
+              "    try { jsonData = pm.response.json(); } catch (e) { return; }",
+              "    pm.expect(jsonData).to.not.have.property(\"error\");",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "id": "e5c35cd0-796e-4a7a-a954-d21d589e0bc3",
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "id": "71f07427-4020-423d-9d67-4b45c664d3a5",
+      "request": {
+        "method": "POST",
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/daily-logs/meal",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "daily-logs",
+            "meal"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Daily Logs",
+      "event": [
+        {
+          "id": "ac548099-c6f9-4692-b31e-2aa505edd0a8",
+          "listen": "test",
+          "script": {
+            "id": "19d332bf-4120-4237-bc35-a1ba0ceac3c4",
+            "exec": [
+              "// Daily Logs",
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.expect(pm.response.code).to.eql(200);",
+              "});",
+              "",
+              "pm.test(\"Response is JSON\", function () {",
+              "    pm.response.to.have.header(\"Content-Type\");",
+              "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+              "});",
+              "",
+              "try {",
+              "    var jsonData = pm.response.json();",
+              "    pm.test(\"Response is array of logs\", function () {",
+              "        pm.expect(jsonData).to.be.an(\"array\");",
+              "        if (jsonData.length > 0) {",
+              "            pm.expect(jsonData[0]).to.have.property(\"date\");",
+              "            pm.expect(jsonData[0]).to.have.property(\"meals\");",
+              "        }",
+              "    });",
+              "} catch (e) {",
+              "    pm.test(\"Response is valid JSON\", function () {",
+              "        pm.expect.fail(\"Response is not valid JSON\");",
+              "    });",
+              "}",
+              "",
+              "pm.test(\"No error in response\", function () {",
+              "    var jsonData;",
+              "    try { jsonData = pm.response.json(); } catch (e) { return; }",
+              "    pm.expect(jsonData).to.not.have.property(\"error\");",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "id": "cc425097-27e0-43be-a31b-2da09e5e314c",
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "id": "26163b1e-d0a4-4ce8-9f38-ab7e15c04a65",
+      "request": {
+        "method": "POST",
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/daily-logs?date=2025-11-24",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "daily-logs"
+          ],
+          "query": [
+            {
+              "key": "date",
+              "value": "2025-11-24"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Feedback AI",
+      "id": "cbe77e5b-6599-460c-9609-677a08f39471",
+      "request": {
+        "method": "POST",
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/feedback/daily",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "feedback",
+            "daily"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Progress Daily",
+      "id": "e6d629a8-4bea-40d5-8aa7-6cb3d67c0e89",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/progress/daily?date=2025-11-25",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "progress",
+            "daily"
+          ],
+          "query": [
+            {
+              "key": "date",
+              "value": "2025-11-25"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Weekly Analytics",
+      "id": "52403118-0066-471a-afbd-279a1201c32a",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/progress/weekly?date=2025-11-25",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "progress",
+            "weekly"
+          ],
+          "query": [
+            {
+              "key": "date",
+              "value": "2025-11-25"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Exercise Logs",
+      "id": "8e1f024d-1882-4184-a65c-85e438e6c47a",
+      "request": {
+        "method": "POST",
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"exercise_date\": \"2025-11-25\",\r\n    \"exercise_type\": \"Running\",\r\n    \"duration\": 30,            // menit\r\n    \"calories_burned\": 300\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/exercises",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "exercises"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Update Weight",
+      "id": "85ecb6b4-3cd2-44ea-b8aa-085e17e86f79",
+      "request": {
+        "method": "POST",
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/assessment/weight",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "assessment",
+            "weight"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Search Food USDA API",
+      "id": "a66a0831-ca12-4a4f-89b2-ac50057a4500",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/foods?search=apple&source=online",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "foods"
+          ],
+          "query": [
+            {
+              "key": "search",
+              "value": "apple"
+            },
+            {
+              "key": "source",
+              "value": "online"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Food Detail USDA",
+      "id": "bd253e82-b1ca-4fa5-aba3-17d7fd541304",
+      "request": {
+        "method": "GET",
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"age\": 18,\r\n    \"gender\": \"female\",          // \"male\" atau \"female\"\r\n    \"height\": 155,             // dalam cm\r\n    \"weight\": 40,              // dalam kg\r\n    \"activity_level\": \"Moderate\", // Pilihan: \"Sedentary\", \"Light\", \"Moderate\", \"Very Active\"\r\n    \"health_goal\": \"Maintain\",    // Pilihan: \"Weight Loss\", \"Maintain\", \"Weight Gain\", \"Build Muscle\"\r\n    \"dietary_preference\": \"Halal\" // Optional\r\n}",
+          "options": {
+            "raw": {
+              "language": "text"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/foods/523877?source=online",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "foods",
+            "523877"
+          ],
+          "query": [
+            {
+              "key": "source",
+              "value": "online"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Food List USDA",
+      "id": "fd7c83c3-b9b6-46d6-b147-6329e298eb9a",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/foods/list?source=online",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "foods",
+            "list"
+          ],
+          "query": [
+            {
+              "key": "source",
+              "value": "online"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Batch Food Detail",
+      "id": "d477283d-fca4-464a-ac8b-12f7f893bb82",
+      "request": {
+        "method": "POST",
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"fdcIds\": [571366, 123765]\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/foods/batch",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "foods",
+            "batch"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Check Profile",
+      "id": "19f6ce2c-b4b4-4a21-bd52-ef2fa42ebb63",
+      "request": {
+        "method": "GET",
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"email\": \"khalisa@gmail.com\",\r\n    \"password\": \"12345678\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "text"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/auth/me",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "auth",
+            "me"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Health Assesment",
+      "id": "64e96370-3104-4c20-b149-9f044b88393f",
+      "request": {
+        "method": "GET",
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/assessment",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "assessment"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Login",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "id": "fd33143d-ab24-41db-99d1-50c24d60e73b",
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript"
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "id": "636447e7-77f7-4e13-97d6-523e7a7250dd",
+            "exec": [
+              "// 1. Ambil respon\r",
+              "var jsonData = pm.response.json();\r",
+              "\r",
+              "// 2. Cek di console (Perbaikan path)\r",
+              "console.log(\"Token didapat:\", jsonData.data.access_token);\r",
+              "\r",
+              "// 3. Simpan token (PERBAIKAN UTAMA ADA DI SINI)\r",
+              "// Tambahkan .data di tengah-tengah\r",
+              "pm.collectionVariables.set(\"token\", jsonData.data.access_token);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "id": "853d6f36-9520-467f-95d0-4e59368cda20",
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "POST",
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"email\": \"khalisa@gmail.com\",\r\n    \"password\": \"12345678\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/auth/login",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "auth",
+            "login"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Food Detail",
+      "id": "045f5d2b-e1d9-4df0-ad3b-80ecfff8b5dc",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/foods/1",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "foods",
+            "1"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Update Profile",
+      "id": "2961b130-df98-435a-aa4f-648c5614b9fc",
+      "request": {
+        "method": "PUT",
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"name\": \"Nama Baru\",\r\n    \"email\": \"emailbaru@example.com\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/auth/profile",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "auth",
+            "profile"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Log Out",
+      "id": "5d483c0e-fac1-4423-bef6-851531730e9c",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/auth/logout",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "auth",
+            "logout"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Reset Password",
+      "id": "ee4fa777-8074-4427-94a8-d668bb0757bb",
+      "request": {
+        "method": "POST",
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"token\": \"paste_token_disini\",\r\n    \"email\": \"user@example.com\",\r\n    \"password\": \"passwordBaru123\",\r\n    \"password_confirmation\": \"passwordBaru123\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/auth/reset-password",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "auth",
+            "reset-password"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Forgot Password",
+      "id": "2a57516b-b8fd-44d9-891e-3443ff545005",
+      "request": {
+        "method": "POST",
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"email\": \"fayruzaldi0@gmail.com\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/auth/forgot-password",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "auth",
+            "forgot-password"
+          ]
+        }
+      }
+    },
+    {
+      "name": "New Request",
+      "id": "94d44b38-be2b-4770-baaf-6e50175815a7",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": ""
+        }
+      }
+    },
+    {
+      "name": "New Request",
+      "id": "5c203694-e89d-41ee-ae0b-34d488e2b858",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": ""
+        }
+      }
+    },
+    {
+      "name": "New Request",
+      "id": "6c00ddb3-424a-4582-84d8-b644fbbeea77",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": ""
+        }
+      }
+    },
+    {
+      "name": "New Request",
+      "id": "fd0e80db-c68a-4149-96eb-f1990b360d45",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": ""
+        }
+      }
+    },
+    {
+      "name": "New Request",
+      "id": "65f6c451-5969-4c91-bd2f-8efe054c30a0",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": ""
+        }
+      }
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "id": "2f71ad87-36c8-4488-bd81-e115775f5940",
+      "key": "token",
+      "value": ""
+    }
+  ]
+}
