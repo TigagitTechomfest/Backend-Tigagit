@@ -12,10 +12,10 @@ class HealthAssessmentController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'age' => 'required|integer',
+            'age' => 'required|integer|min:15|max:65',
             'gender' => 'required|in:male,female',
-            'height' => 'required|numeric',
-            'weight' => 'required|numeric',
+            'height' => 'required|numeric|min:50|max:300', // 50cm - 300cm
+            'weight' => 'required|numeric|min:20|max:500', // 20kg - 500kg
             'activity_level' => 'required|string',
             'health_goal' => 'required|string',
             'dietary_preference' => 'nullable|string',
