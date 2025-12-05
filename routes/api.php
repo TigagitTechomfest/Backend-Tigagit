@@ -41,6 +41,8 @@ Route::middleware(['auth:api'])->group(function () {
     // Daily Logs
     Route::get('daily-logs', [DailyLogController::class, 'getDailyLog']);
     Route::post('daily-logs/meal', [DailyLogController::class, 'addMeal']);
+    Route::put('daily-logs/meal', [DailyLogController::class, 'updateMeal']);
+    Route::delete('daily-logs/meal', [DailyLogController::class, 'deleteMeal']);
 
     // AI Feedback
     Route::post('feedback/daily', [AiFeedbackController::class, 'generateDailyFeedback']);
