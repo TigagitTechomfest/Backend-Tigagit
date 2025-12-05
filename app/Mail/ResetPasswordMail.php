@@ -39,11 +39,13 @@ class ResetPasswordMail extends Mailable
     /**
      * Get the message content definition.
      */
-    public function content(): Content
+   public function content(): Content
     {
         return new Content(
-            view: 'emails.reset_password',
-            with: ['token' => $this->token],
+            markdown: 'emails.reset_password', // <--- Ganti jadi ini
+            with: [
+                'token' => $this->token,
+            ],
         );
     }
 

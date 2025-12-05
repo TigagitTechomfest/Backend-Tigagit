@@ -19,13 +19,7 @@ class FoodDatabaseController extends Controller
 
     public function index(Request $request)
     {
-        // If 'source=online' is specified, search USDA API directly
-        if ($request->query('source') === 'online' && $request->has('search')) {
-            $foods = $this->usdaService->search($request->search);
-            return response()->json(['success' => true, 'message' => 'Foods retrieved from USDA', 'data' => $foods]);
-        }
-
-        // Default: Local Search
+        // 1. Local Search First
         $query = FoodDatabase::query();
 
         if ($request->has('search')) {
@@ -38,9 +32,25 @@ class FoodDatabaseController extends Controller
 
         $foods = $query->paginate(20);
 
-        // If local search returns empty and search term exists, optionally fallback to USDA
-        // But for now, let's keep it explicit via 'source' param to avoid rate limits on every typo
-        
+        // 2. If local search is empty AND search term is provided, try USDA
+        if ($foods->isEmpty() && $request->has('search')) {
+            $usdaFoods = $this->usdaService->search($request->search);
+            
+            // Save fetched foods to local DB to build up the database
+            foreach ($usdaFoods as $foodData) {
+                // Check if already exists by external_id to avoid duplicates
+                FoodDatabase::firstOrCreate(
+                    ['external_id' => $foodData['external_id']],
+                    $foodData
+                );
+            }
+
+            // Re-run local search to include newly added items
+            $foods = FoodDatabase::where('food_name', 'ilike', '%' . $request->search . '%')->paginate(20);
+            
+            return response()->json(['success' => true, 'message' => 'Foods retrieved from USDA and saved locally', 'data' => $foods]);
+        }
+
         return response()->json(['success' => true, 'message' => 'Foods retrieved', 'data' => $foods]);
     }
 
@@ -66,22 +76,26 @@ class FoodDatabaseController extends Controller
 
     public function show(Request $request, $id)
     {
-        // Check if it's a request for online data
-        if ($request->query('source') === 'online') {
-            $food = $this->usdaService->getFood($id);
-            if (!$food) {
-                return response()->json(['success' => false, 'message' => 'Food not found in USDA', 'data' => null], 404);
-            }
-            return response()->json(['success' => true, 'message' => 'Food details from USDA', 'data' => $food]);
-        }
-
-        // Local search
+        // 1. Try to find in local database first
         $food = FoodDatabase::find($id);
-        if (!$food) {
-            return response()->json(['success' => false, 'message' => 'Food not found', 'data' => null], 404);
+        
+        if ($food) {
+            return response()->json(['success' => true, 'message' => 'Food details', 'data' => $food]);
         }
 
-        return response()->json(['success' => true, 'message' => 'Food details', 'data' => $food]);
+        // 2. If not found locally, try to find in USDA by external_id (if $id is treated as fdcId) 
+        // OR if the user explicitly requested 'source=online' or passed an FDC ID.
+        // Assuming $id could be an FDC ID if not found in local DB.
+        
+        $usdaFood = $this->usdaService->getFood($id);
+
+        if ($usdaFood) {
+            // 3. Save to local database for future use
+            $newFood = FoodDatabase::create($usdaFood);
+            return response()->json(['success' => true, 'message' => 'Food details fetched from USDA and saved', 'data' => $newFood]);
+        }
+
+        return response()->json(['success' => false, 'message' => 'Food not found', 'data' => null], 404);
     }
 
     public function list(Request $request)

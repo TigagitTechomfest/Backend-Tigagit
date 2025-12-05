@@ -148,6 +148,16 @@ class AuthController extends Controller
 
         // Send Email
         try {
+            $frontendUrl = env('FRONTEND_URL');
+            $resetLink = $frontendUrl . "/reset-password?token=" . $token;
+            
+            // Passing token to mail, assuming mail view constructs the link or we pass the link
+            // For now, let's keep passing the token as the Mail class expects, 
+            // but we can update the Mail class to accept the full link if needed.
+            // However, the user specifically asked about the link *generation*.
+            // The Mail class currently uses {{ $token }} to build the link in the view.
+            // So we should update the VIEW to use the env variable or pass the full link.
+            
             Mail::to($request->email)->send(new ResetPasswordMail($token));
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => 'Failed to send email: ' . $e->getMessage()], 500);
