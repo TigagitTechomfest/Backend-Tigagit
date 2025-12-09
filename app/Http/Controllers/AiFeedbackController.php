@@ -65,6 +65,7 @@ class AiFeedbackController extends Controller
             'feedback_type' => 'daily',
             'feedback_message' => $aiResponse['feedback_message'],
             'suggested_foods' => $aiResponse['suggested_foods'],
+            'foods_to_avoid' => $aiResponse['foods_to_avoid'] ?? [],
             'suggested_exercises' => $aiResponse['suggested_exercises'],
             'macro_analysis' => $aiResponse['macro_analysis'],
         ]);

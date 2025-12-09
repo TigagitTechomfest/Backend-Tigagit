@@ -41,14 +41,15 @@ Analyze the weekly progress for {$user->name}.
 
 **Task:**
 Provide a short, encouraging weekly insight (max 2 sentences) focusing on their consistency and calorie adherence.
+IMPORTANT: Provide the response in Indonesian language.
 
 **Output JSON Format:**
 {
-    "insight": "Your insight here."
+    "insight": "Your insight here in Indonesian."
 }
 EOT;
 
-        return $this->callGemini($prompt)['insight'] ?? "Keep up the good work! Consistency is key.";
+        return $this->callGemini($prompt)['insight'] ?? "Pertahankan kerja bagus! Konsistensi adalah kunci.";
     }
 
     protected function callGemini($prompt)
@@ -123,14 +124,22 @@ Analyze the following user data and provide personalized feedback in JSON format
 **Task:**
 1. Analyze the intake vs target.
 2. Provide a motivational and actionable feedback message (max 2 sentences).
-3. Suggest 2 specific foods to eat (if under target) or avoid (if over target).
-4. Suggest 1 specific exercise based on the net calorie status.
+3. Suggest 2 specific foods to eat (if under target).
+4. Suggest 2 specific foods to avoid (if over target).
+5. Suggest 1 specific exercise based on the net calorie status.
+
+**IMPORTANT STYLE GUIDE (GEN Z / TEENAGE FRIENDLY - INDONESIAN):**
+- Use "Gen Z" slang and relaxed Indonesian language (e.g., "ngadi-ngadi", "flexing", "healing", "spill the tea", "red flag", "sat-set", "mager", "bestie", "guys").
+- ALWAYS mention the user's name ({$user->name}) in the feedback.
+- Be fun, encouraging, but informative.
+- Example: "Rico, santai! Tapi data kita lagi ngadi-ngadi nih. Kalori, lemak, karbo lagi flexing di atas target. Protein? Dia lagi healing di level rendah. Kuncinya: Kita spill the tea ke badan kita dengan kasih protein Halal yang oke dan say bye ke yang fat-carb-heavy. Biar gak prank timbangan, ya!"
 
 **Output JSON Format:**
 {
-    "feedback_message": "Your message here.",
-    "suggested_foods": ["Food 1", "Food 2"],
-    "suggested_exercises": ["Exercise 1"],
+    "feedback_message": "Pesan gaya Gen Z Anda di sini.",
+    "suggested_foods": ["Makanan Rekomendasi 1", "Makanan Rekomendasi 2"],
+    "foods_to_avoid": ["Makanan Hindari 1", "Makanan Hindari 2"],
+    "suggested_exercises": ["Latihan 1"],
     "macro_analysis": {
         "protein_status": "Low/Good/High",
         "carbs_status": "Low/Good/High",
@@ -140,18 +149,43 @@ Analyze the following user data and provide personalized feedback in JSON format
 EOT;
     }
 
+    public function estimateCalories($exerciseType, $duration, $userWeight)
+    {
+        $prompt = <<<EOT
+You are an expert fitness coach AI.
+Estimate the calories burned for the following activity.
+
+**Activity Details:**
+- Exercise: {$exerciseType}
+- Duration: {$duration} minutes
+- User Weight: {$userWeight} kg
+
+**Task:**
+Calculate/Estimate the calories burned. Return ONLY the integer number.
+
+**Output JSON Format:**
+{
+    "calories": 150
+}
+EOT;
+
+        $response = $this->callGemini($prompt);
+        return $response['calories'] ?? 0;
+    }
+
     protected function fallbackFeedback()
     {
         return [
-            "feedback_message" => "Great job tracking today! Keep it up.",
-            "suggested_foods" => ["Healthy balanced meal"],
-            "suggested_exercises" => ["Light walking"],
+            "feedback_message" => "Halo bestie! Kerja bagus hari ini tracking-nya. Tetap semangat ya, jangan kasih kendor!",
+            "suggested_foods" => ["Ayam Bakar (tanpa kulit)", "Sayur Bening Bayam"],
+            "foods_to_avoid" => ["Gorengan berminyak", "Minuman manis berlebih"],
+            "suggested_exercises" => ["Jalan santai sambil dengerin musik"],
             "macro_analysis" => [
                 "protein_status" => "Good",
                 "carbs_status" => "Good",
                 "fat_status" => "Good"
             ],
-            "insight" => "Keep pushing towards your goals!"
+            "insight" => "Konsistensi itu kunci, bestie! Gas terus!"
         ];
     }
 }
