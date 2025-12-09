@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Log;
 class GeminiService
 {
     protected $apiKey;
-    protected $baseUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent';
+    protected $baseUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent';
 
     public function __construct()
     {
@@ -53,6 +53,11 @@ EOT;
 
     protected function callGemini($prompt)
     {
+        Log::info('GeminiService: Preparing to call Gemini API', [
+            'url' => $this->baseUrl,
+            'prompt_preview' => substr($prompt, 0, 100)
+        ]);
+
         try {
             $response = Http::withHeaders([
                 'Content-Type' => 'application/json',
@@ -66,10 +71,12 @@ EOT;
                 ],
                 'generationConfig' => [
                     'temperature' => 0.7,
-                    'maxOutputTokens' => 1000,
+                    'maxOutputTokens' => 8192,
                     'responseMimeType' => 'application/json',
                 ]
             ]);
+
+            Log::info('GeminiService: API Response Status', ['status' => $response->status()]);
 
             if ($response->failed()) {
                 Log::error('Gemini API Error: ' . $response->body());
@@ -79,6 +86,8 @@ EOT;
             $data = $response->json();
             $rawText = $data['candidates'][0]['content']['parts'][0]['text'] ?? '{}';
             
+            Log::info('GeminiService: Raw Response Text', ['text' => substr($rawText, 0, 200)]);
+
             return json_decode($rawText, true) ?? $this->fallbackFeedback();
 
         } catch (\Exception $e) {

@@ -68,6 +68,7 @@ class HealthAssessmentController extends Controller
                 'gender' => $request->gender,
                 'height' => $request->height,
                 'weight' => $request->weight,
+                'initial_weight' => $request->weight,
                 'bmi' => round($bmi, 2),
                 'activity_level' => $request->activity_level,
                 'health_goal' => $request->health_goal,
@@ -78,6 +79,15 @@ class HealthAssessmentController extends Controller
                 'daily_fat_target' => round($fat),
             ]
         );
+
+        // Create initial history entry
+        \App\Models\HealthHistory::create([
+            'user_id' => Auth::id(),
+            'history_date' => now()->toDateString(),
+            'weight' => $request->weight,
+            'bmi' => round($bmi, 2),
+            'health_status' => 'Initial Assessment',
+        ]);
 
         return response()->json(['success' => true, 'message' => 'Assessment saved', 'data' => $assessment]);
     }
@@ -112,5 +122,26 @@ class HealthAssessmentController extends Controller
         ]);
 
         return response()->json(['success' => true, 'message' => 'Weight updated', 'data' => $assessment]);
+    }
+
+    public function getWeightHistory()
+    {
+        $history = \App\Models\HealthHistory::where('user_id', Auth::id())
+            ->orderBy('history_date', 'desc')
+            ->get();
+
+        $assessment = HealthAssessment::where('user_id', Auth::id())->first();
+        $initialWeight = $assessment ? $assessment->initial_weight : null;
+        $currentWeight = $assessment ? $assessment->weight : null;
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Weight history retrieved',
+            'data' => [
+                'initial_weight' => $initialWeight,
+                'current_weight' => $currentWeight,
+                'history' => $history
+            ]
+        ]);
     }
 }

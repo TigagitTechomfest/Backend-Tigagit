@@ -15,6 +15,7 @@ class HealthAssessment extends Model
         'gender',
         'height',
         'weight',
+        'initial_weight',
         'bmi',
         'activity_level',
         'health_goal',

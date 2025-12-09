@@ -30,6 +30,7 @@ Route::middleware(['auth:api'])->group(function () {
     Route::post('assessment', [HealthAssessmentController::class, 'store']);
     Route::get('assessment', [HealthAssessmentController::class, 'show']);
     Route::post('assessment/weight', [HealthAssessmentController::class, 'updateWeight']);
+    Route::get('assessment/weight/history', [HealthAssessmentController::class, 'getWeightHistory']);
 
     // Food Database
     Route::get('foods/list', [FoodDatabaseController::class, 'list']);
