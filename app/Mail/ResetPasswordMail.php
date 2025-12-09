@@ -42,7 +42,7 @@ class ResetPasswordMail extends Mailable
    public function content(): Content
     {
         return new Content(
-            markdown: 'emails.reset_password', // <--- Ganti jadi ini
+            markdown: 'emails.reset_password',
             with: [
                 'token' => $this->token,
             ],
