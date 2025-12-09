@@ -18,6 +18,7 @@ class AiFeedback extends Model
         'feedback_type',
         'feedback_message',
         'suggested_foods',
+        'foods_to_avoid',
         'suggested_exercises',
         'macro_analysis',
         'generated_at',
@@ -25,6 +26,7 @@ class AiFeedback extends Model
 
     protected $casts = [
         'suggested_foods' => 'array',
+        'foods_to_avoid' => 'array',
         'suggested_exercises' => 'array',
         'macro_analysis' => 'array',
         'generated_at' => 'datetime',
