@@ -1,19 +1,32 @@
 <x-mail::message>
-{{-- Bagian Logo (Tengah) --}}
+{{-- Logo --}}
 <div style="text-align: center; margin-bottom: 20px;">
-    <img src="https://www.google.com/url?sa=i&url=https%3A%2F%2Fpikbest.com%2Fso%2Fgaming-logo.html&psig=AOvVaw2gwuvpIiZsZyKeuoB99Ku5&ust=1764990791139000&source=images&cd=vfe&opi=89978449&ved=0CBUQjRxqFwoTCMjkv5m9pZEDFQAAAAAdAAAAABAE" alt="NutriGo Team" width="100">
+    <h1 style="color: #22c55e; font-size: 32px; font-weight: bold; margin: 0;">WellNezt</h1>
+    <p style="color: #666; margin: 5px 0 0 0;">Your Health Journey Partner</p>
 </div>
 
-# Reset Password
+Halo!
 
-Use the **'Reset Password'** button below to reset your password.
+Kamu menerima email ini karena kami menerima permintaan reset password untuk akun kamu.
 
-<x-mail::button :url="'http://localhost:3000/reset-password?token=' . $token">
+Klik tombol di bawah untuk reset password:
+
+<x-mail::button :url="config('app.frontend_url') . '/reset-password?token=' . $token . '&email=' . urlencode($email)" color="success">
 Reset Password
 </x-mail::button>
 
-If you did not request a password reset, no further action is required.
+**Link ini akan kadaluarsa dalam 15 menit.**
+
+Jika kamu tidak meminta reset password, abaikan email ini. Password kamu tidak akan berubah.
 
 Thanks,<br>
-NutriGo Team
+**Tigagit** 💚
+
+---
+
+<div style="text-align: center; color: #999; font-size: 12px; margin-top: 20px;">
+    <p>© {{ date('Y') }} WellNezt. All rights reserved.</p>
+    <p>Email ini dikirim otomatis, mohon tidak membalas.</p>
+</div>
+
 </x-mail::message>

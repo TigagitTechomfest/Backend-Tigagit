@@ -158,7 +158,7 @@ class AuthController extends Controller
             // The Mail class currently uses {{ $token }} to build the link in the view.
             // So we should update the VIEW to use the env variable or pass the full link.
             
-            Mail::to($request->email)->send(new ResetPasswordMail($token));
+            Mail::to($request->email)->send(new ResetPasswordMail($token, $request->email));
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => 'Failed to send email: ' . $e->getMessage()], 500);
         }
