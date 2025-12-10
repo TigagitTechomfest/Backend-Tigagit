@@ -54,4 +54,8 @@ Route::middleware(['auth:api'])->group(function () {
 
     // Exercise Logs
     Route::post('exercises', [ExerciseLogController::class, 'store']);
+
+    // Chatbot
+    Route::post('chat/send', [\App\Http\Controllers\ChatController::class, 'sendMessage']);
+    Route::get('chat/history', [\App\Http\Controllers\ChatController::class, 'getHistory']);
 });
