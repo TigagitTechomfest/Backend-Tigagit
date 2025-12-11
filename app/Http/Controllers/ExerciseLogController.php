@@ -47,4 +47,26 @@ class ExerciseLogController extends Controller
 
         return response()->json(['success' => true, 'message' => 'Exercise logged', 'data' => $log]);
     }
+
+    public function index(Request $request)
+    {
+        $date = $request->date ?? now()->toDateString();
+        $logs = ExerciseLog::where('user_id', Auth::id())
+            ->whereDate('exercise_date', $date)
+            ->get();
+
+        return response()->json(['success' => true, 'message' => 'Exercises retrieved', 'data' => $logs]);
+    }
+
+    public function destroy($id)
+    {
+        $log = ExerciseLog::where('user_id', Auth::id())->where('id', $id)->first();
+        
+        if (!$log) {
+            return response()->json(['success' => false, 'message' => 'Exercise log not found'], 404);
+        }
+
+        $log->delete();
+        return response()->json(['success' => true, 'message' => 'Exercise log deleted']);
+    }
 }

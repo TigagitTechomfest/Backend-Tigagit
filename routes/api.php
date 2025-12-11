@@ -27,6 +27,7 @@ Route::group(['prefix' => 'auth'], function () {
 
 Route::middleware(['auth:api'])->group(function () {
     // Health Assessment
+    Route::post('assessment/calculate', [HealthAssessmentController::class, 'calculateGoals']);
     Route::post('assessment', [HealthAssessmentController::class, 'store']);
     Route::get('assessment', [HealthAssessmentController::class, 'show']);
     Route::post('assessment/weight', [HealthAssessmentController::class, 'updateWeight']);
@@ -53,7 +54,9 @@ Route::middleware(['auth:api'])->group(function () {
     Route::get('progress/weekly', [ProgressController::class, 'weekly']);
 
     // Exercise Logs
+    Route::get('exercises', [ExerciseLogController::class, 'index']);
     Route::post('exercises', [ExerciseLogController::class, 'store']);
+    Route::delete('exercises/{id}', [ExerciseLogController::class, 'destroy']);
 
     // Chatbot
     Route::post('chat/send', [\App\Http\Controllers\ChatController::class, 'sendMessage']);
