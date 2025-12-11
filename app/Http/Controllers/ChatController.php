@@ -21,6 +21,19 @@ class ChatController extends Controller
 
         $user = \Illuminate\Support\Facades\Auth::user();
 
+        // 0. Check Daily Limit (Max 5/day)
+        $todayCount = \App\Models\ChatMessage::where('user_id', $user->id)
+            ->where('sender', 'user')
+            ->whereDate('created_at', now()->toDateString())
+            ->count();
+
+        if ($todayCount >= 5) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda telah mencapai batas 5 chat per hari. Silakan kembali besok atau upgrade ke premium.'
+            ], 429);
+        }
+
         // 1. Save User Message
         $userMessage = \App\Models\ChatMessage::create([
             'user_id' => $user->id,

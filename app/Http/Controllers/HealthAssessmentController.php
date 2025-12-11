@@ -29,6 +29,14 @@ class HealthAssessmentController extends Controller
         $heightM = $request->height / 100;
         $bmi = $request->weight / ($heightM * $heightM);
 
+        // Validate Goal based on BMI
+        if ($bmi >= 25 && ($request->health_goal == 'Weight Gain' || $request->health_goal == 'Build Muscle' || $request->health_goal == 'BULKING')) {
+             return response()->json(['success' => false, 'message' => 'Invalid Goal: You cannot choose Weight Gain/Bulking when Overweight.'], 400);
+        }
+        if ($bmi < 18.5 && ($request->health_goal == 'Weight Loss' || $request->health_goal == 'CUTTING')) {
+             return response()->json(['success' => false, 'message' => 'Invalid Goal: You cannot choose Weight Loss/Cutting when Underweight.'], 400);
+        }
+
         // Calculate BMR (Harris-Benedict)
         if ($request->gender == 'male') {
             $bmr = 88.362 + (13.397 * $request->weight) + (4.799 * $request->height) - (5.677 * $request->age);
@@ -142,6 +150,116 @@ class HealthAssessmentController extends Controller
                 'current_weight' => $currentWeight,
                 'history' => $history
             ]
+        ]);
+    }
+
+    public function calculateGoals(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'age' => 'required|integer|min:15|max:65',
+            'gender' => 'required|in:male,female',
+            'height' => 'required|numeric|min:50|max:300', 
+            'weight' => 'required|numeric|min:20|max:500',
+            'activity_level' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'message' => 'Validation Error', 'data' => $validator->errors()], 400);
+        }
+
+        // 1. BMI Calculation
+        $heightM = $request->height / 100;
+        $bmi = $request->weight / ($heightM * $heightM);
+        $bmi = round($bmi, 1); // Round to 1 decimal for consistency
+
+        // Determine BMI Label
+        if ($bmi < 18.5) {
+            $bmiLabel = "Underweight";
+        } elseif ($bmi >= 18.5 && $bmi <= 24.9) {
+            $bmiLabel = "Ideal";
+        } else {
+            $bmiLabel = "Overweight"; // Covers Overweight and Obese
+        }
+
+        // 2. BMR & TDEE (Mifflin-St Jeor)
+        if ($request->gender == 'male') {
+            $bmr = (10 * $request->weight) + (6.25 * $request->height) - (5 * $request->age) + 5;
+        } else {
+            $bmr = (10 * $request->weight) + (6.25 * $request->height) - (5 * $request->age) - 161;
+        }
+
+        $activityMultipliers = [
+            'Sedentary' => 1.2,
+            'Light' => 1.375,
+            'Moderate' => 1.55,
+            'Very Active' => 1.725,
+        ];
+        $multiplier = $activityMultipliers[$request->activity_level] ?? 1.2;
+        $tdee = round($bmr * $multiplier);
+
+        // 3. Logic Goal
+        $recommendation = [];
+        $availableGoals = [];
+
+        if ($bmi < 18.5) {
+            // Case A: Underweight
+            $recommendation = [
+                'primaryGoal' => 'BULKING',
+                'message' => 'Berat badanmu di bawah ideal. Disarankan fokus menambah massa otot/berat badan.'
+            ];
+            $allowed = ['BULKING', 'MAINTAIN'];
+        } elseif ($bmi >= 18.5 && $bmi <= 24.9) {
+            // Case B: Ideal
+            $recommendation = [
+                'primaryGoal' => 'USER_CHOICE',
+                'message' => 'Berat badanmu ideal. Tentukan tujuanmu selanjutnya.'
+            ];
+            $allowed = ['BULKING', 'CUTTING', 'MAINTAIN'];
+        } else {
+            // Case C: Overweight/Obese
+            $recommendation = [
+                'primaryGoal' => 'CUTTING',
+                'message' => 'Berat badanmu di atas ideal. Disarankan defisit kalori untuk mencapai berat ideal.'
+            ];
+            $allowed = ['CUTTING', 'MAINTAIN'];
+        }
+
+        // Generate Available Goals Data
+        foreach ($allowed as $type) {
+            $targetCalories = $tdee;
+            $label = '';
+            $description = '';
+
+            if ($type === 'BULKING') {
+                $targetCalories = $tdee + 500;
+                $label = 'Build Muscle';
+                $description = 'Fokus menambah massa otot.';
+            } elseif ($type === 'CUTTING') {
+                $targetCalories = $tdee - 500;
+                $label = 'Lose Fat';
+                $description = 'Fokus mengurangi lemak/definisi otot.';
+            } elseif ($type === 'MAINTAIN') {
+                $targetCalories = $tdee;
+                $label = 'Maintain Weight';
+                $description = 'Jaga berat badan & vitalitas.';
+            }
+
+            $availableGoals[] = [
+                'type' => $type,
+                'label' => $label,
+                'targetCalories' => $targetCalories,
+                'description' => $description
+            ];
+        }
+
+        return response()->json([
+            'meta' => [
+                'bmi' => $bmi,
+                'bmiLabel' => $bmiLabel,
+                'tdee' => $tdee
+            ],
+            'recommendation' => $recommendation,
+            'availableGoals' => $availableGoals
         ]);
     }
 }
