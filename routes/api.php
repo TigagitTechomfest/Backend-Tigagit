@@ -25,10 +25,11 @@ Route::group(['prefix' => 'auth'], function () {
     Route::post('reset-password', [AuthController::class, 'resetPassword']);
 });
 
+// Public Assessment Routes (Onboarding)
+Route::post('assessment/calculate', [HealthAssessmentController::class, 'calculateGoals']);
+
 Route::middleware(['auth:api'])->group(function () {
-    // Health Assessment
-    Route::post('assessment/calculate', [HealthAssessmentController::class, 'calculateGoals']);
-    Route::post('assessment', [HealthAssessmentController::class, 'store']);
+    // Health Assessment (Protected)
     Route::get('assessment', [HealthAssessmentController::class, 'show']);
     Route::post('assessment/weight', [HealthAssessmentController::class, 'updateWeight']);
     Route::get('assessment/weight/history', [HealthAssessmentController::class, 'getWeightHistory']);

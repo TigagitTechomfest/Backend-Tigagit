@@ -24,31 +24,120 @@ class AuthController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:6',
+            
+            // Health Assessment Data (Required for onboarding flow)
+            'age' => 'required|integer|min:15|max:65',
+            'gender' => 'required|in:male,female',
+            'height' => 'required|numeric|min:50|max:300', 
+            'weight' => 'required|numeric|min:20|max:500', 
+            'activity_level' => 'required|string',
+            'health_goal' => 'required|string',
+            'dietary_preference' => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
             return response()->json(['success' => false, 'message' => 'Validation Error', 'data' => $validator->errors()], 400);
         }
 
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-        ]);
+        // 1. Calculate BMI
+        $heightM = $request->height / 100;
+        $bmi = $request->weight / ($heightM * $heightM);
 
-        $token = Auth::guard('api')->login($user);
+        // 2. Validate Goal based on BMI (Strict Rule)
+        if ($bmi >= 25 && in_array($request->health_goal, ['Weight Gain', 'Build Muscle', 'BULKING'])) {
+             return response()->json(['success' => false, 'message' => 'Invalid Goal: You cannot choose Weight Gain/Bulking when Overweight.'], 400);
+        }
+        if ($bmi < 18.5 && in_array($request->health_goal, ['Weight Loss', 'CUTTING'])) {
+             return response()->json(['success' => false, 'message' => 'Invalid Goal: You cannot choose Weight Loss/Cutting when Underweight.'], 400);
+        }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'User created successfully',
-            'data' => [
-                'user' => $user,
-                'authorization' => [
-                    'token' => $token,
-                    'type' => 'bearer',
+        \Illuminate\Support\Facades\DB::beginTransaction();
+
+        try {
+            $user = User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+            ]);
+
+            // Calculate BMR (Harris-Benedict)
+            if ($request->gender == 'male') {
+                $bmr = 88.362 + (13.397 * $request->weight) + (4.799 * $request->height) - (5.677 * $request->age);
+            } else {
+                $bmr = 447.593 + (9.247 * $request->weight) + (3.098 * $request->height) - (4.330 * $request->age);
+            }
+
+            $activityMultipliers = [
+                'Sedentary' => 1.2,
+                'Light' => 1.375,
+                'Moderate' => 1.55,
+                'Very Active' => 1.725,
+            ];
+            $multiplier = $activityMultipliers[$request->activity_level] ?? 1.2;
+            $tdee = $bmr * $multiplier;
+
+            $goalAdjustments = [
+                'Weight Loss' => -500,
+                'CUTTING' => -500,
+                'Maintain' => 0,
+                'MAINTAIN' => 0,
+                'Weight Gain' => 500,
+                'BULKING' => 500,
+                'Build Muscle' => 250,
+            ];
+            
+            $adjustment = $goalAdjustments[$request->health_goal] ?? 0;
+            $dailyCalories = $tdee + $adjustment;
+
+            $protein = ($dailyCalories * 0.25) / 4;
+            $carbs = ($dailyCalories * 0.50) / 4;
+            $fat = ($dailyCalories * 0.25) / 9;
+
+            \App\Models\HealthAssessment::create([
+                'user_id' => $user->id,
+                'age' => $request->age,
+                'gender' => $request->gender,
+                'height' => $request->height,
+                'weight' => $request->weight,
+                'initial_weight' => $request->weight,
+                'bmi' => round($bmi, 2),
+                'activity_level' => $request->activity_level,
+                'health_goal' => $request->health_goal,
+                'dietary_preference' => $request->dietary_preference,
+                'daily_calorie_target' => round($dailyCalories),
+                'daily_protein_target' => round($protein),
+                'daily_carbs_target' => round($carbs),
+                'daily_fat_target' => round($fat),
+            ]);
+
+            \App\Models\HealthHistory::create([
+                'user_id' => $user->id,
+                'history_date' => now()->toDateString(),
+                'weight' => $request->weight,
+                'bmi' => round($bmi, 2),
+                'health_status' => 'Initial Assessment',
+            ]);
+
+            \Illuminate\Support\Facades\DB::commit();
+
+            $token = Auth::guard('api')->login($user);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'User created successfully',
+                'data' => [
+                    'user' => $user,
+                    'authorization' => [
+                        'token' => $token,
+                        'type' => 'bearer',
+                    ]
                 ]
-            ]
-        ], 201);
+            ], 201);
+
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\DB::rollBack();
+            return response()->json(['success' => false, 'message' => 'Registration failed: ' . $e->getMessage()], 500);
+        }
     }
 
     public function login(Request $request)
