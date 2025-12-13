@@ -12,6 +12,7 @@ class FoodDatabase extends Model
     protected $table = 'food_database';
 
     protected $fillable = [
+        'external_id',
         'food_name',
         'category',
         'calories_per_100g',
