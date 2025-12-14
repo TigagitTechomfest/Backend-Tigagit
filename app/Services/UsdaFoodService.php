@@ -11,7 +11,7 @@ class UsdaFoodService
 
     public function __construct()
     {
-        $this->apiKey = env('USDA_API_KEY');
+        $this->apiKey = config('services.usda.key');
     }
 
     protected function client()
@@ -23,6 +23,8 @@ class UsdaFoodService
 
     public function search($query)
     {
+        \Illuminate\Support\Facades\Log::info("USDA searching for: " . $query);
+
         $response = $this->client()->get("{$this->baseUrl}/foods/search", [
             'query' => $query,
             'pageSize' => 20,
@@ -30,6 +32,7 @@ class UsdaFoodService
         ]);
 
         if ($response->failed()) {
+            \Illuminate\Support\Facades\Log::error("USDA API Failed: " . $response->body());
             return [];
         }
 

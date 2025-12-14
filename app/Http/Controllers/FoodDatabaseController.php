@@ -23,7 +23,7 @@ class FoodDatabaseController extends Controller
         $query = FoodDatabase::query();
 
         if ($request->has('search')) {
-            $query->where('food_name', 'ilike', '%' . $request->search . '%');
+            $query->where('food_name', 'like', '%' . $request->search . '%');
         }
 
         if ($request->has('category')) {
@@ -46,7 +46,7 @@ class FoodDatabaseController extends Controller
             }
 
             // Re-run local search to include newly added items
-            $foods = FoodDatabase::where('food_name', 'ilike', '%' . $request->search . '%')->paginate(20);
+            $foods = FoodDatabase::where('food_name', 'like', '%' . $request->search . '%')->paginate(20);
             
             return response()->json(['success' => true, 'message' => 'Foods retrieved from USDA and saved locally', 'data' => $foods]);
         }
