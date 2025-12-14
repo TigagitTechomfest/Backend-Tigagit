@@ -39,4 +39,8 @@ return [
         'api_key' => env('GEMINI_API_KEY'),
     ],
 
+    'usda' => [
+        'key' => env('USDA_API_KEY'),
+    ],
+
 ];
