@@ -19,39 +19,55 @@ class FoodDatabaseController extends Controller
 
     public function index(Request $request)
     {
-        // 1. Local Search First
-        $query = FoodDatabase::query();
+        $search = $request->search;
+        $forceOnline = $request->query('source') === 'online';
+        $message = 'Foods retrieved';
 
-        if ($request->has('search')) {
-            $query->where('food_name', 'like', '%' . $request->search . '%');
-        }
-
-        if ($request->has('category')) {
-            $query->where('category', $request->category);
-        }
-
-        $foods = $query->paginate(20);
-
-        // 2. If local search is empty AND search term is provided, try USDA
-        if ($foods->isEmpty() && $request->has('search')) {
-            $usdaFoods = $this->usdaService->search($request->search);
-            
-            // Save fetched foods to local DB to build up the database
+        // 1. If explicit online search requested, fetch from USDA first and sync
+        if ($forceOnline && $search) {
+            $usdaFoods = $this->usdaService->search($search);
             foreach ($usdaFoods as $foodData) {
-                // Check if already exists by external_id to avoid duplicates
                 FoodDatabase::firstOrCreate(
                     ['external_id' => $foodData['external_id']],
                     $foodData
                 );
             }
-
-            // Re-run local search to include newly added items
-            $foods = FoodDatabase::where('food_name', 'like', '%' . $request->search . '%')->paginate(20);
-            
-            return response()->json(['success' => true, 'message' => 'Foods retrieved from USDA and saved locally', 'data' => $foods]);
+            $message = 'Foods retrieved from USDA and saved locally';
         }
 
-        return response()->json(['success' => true, 'message' => 'Foods retrieved', 'data' => $foods]);
+        // 2. Perform Local Search (Case Insensitive)
+        $query = FoodDatabase::query();
+
+        if ($search) {
+            // Compatible with both Postgres (ILIK-ish) and MySQL
+            $query->whereRaw('LOWER(food_name) LIKE ?', ['%' . strtolower($search) . '%']);
+        }
+
+        if ($request->has('category') && $request->category != 'All') {
+            $query->where('category', $request->category);
+        }
+
+        $foods = $query->paginate(20);
+
+        // 3. Auto Fallback: If local result is empty AND NOT forced online already, try USDA
+        if ($foods->isEmpty() && $search && !$forceOnline) {
+            $usdaFoods = $this->usdaService->search($search);
+            
+            if (!empty($usdaFoods)) {
+                foreach ($usdaFoods as $foodData) {
+                    FoodDatabase::firstOrCreate(
+                        ['external_id' => $foodData['external_id']],
+                        $foodData
+                    );
+                }
+                
+                // Re-run local search to include newly added items
+                $foods = FoodDatabase::whereRaw('LOWER(food_name) LIKE ?', ['%' . strtolower($search) . '%'])->paginate(20);
+                $message = 'Foods retrieved from USDA (fallback)';
+            }
+        }
+
+        return response()->json(['success' => true, 'message' => $message, 'data' => $foods]);
     }
 
     public function store(Request $request)
